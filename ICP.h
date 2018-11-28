@@ -16,7 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef ICP_H
 #define ICP_H
-#include <nanoflann.hpp>
+#include <include/nanoflann.hpp>
 #include <Eigen/Dense>
 ///////////////////////////////////////////////////////////////////////////////
 namespace nanoflann {
@@ -248,7 +248,7 @@ namespace SICP {
     /// @param Target (one 3D point per column)
     /// @param Parameters
     template <typename Derived1, typename Derived2>
-    void point_to_point(Eigen::MatrixBase<Derived1>& X,
+    Eigen::Affine3d point_to_point(Eigen::MatrixBase<Derived1>& X,
                         Eigen::MatrixBase<Derived2>& Y,
                         Parameters par = Parameters()) {
         /// Build kd-tree
@@ -259,6 +259,7 @@ namespace SICP {
         Eigen::Matrix3Xd C = Eigen::Matrix3Xd::Zero(3, X.cols());
         Eigen::Matrix3Xd Xo1 = X;
         Eigen::Matrix3Xd Xo2 = X;
+        Eigen::Matrix3Xd originalX = X;
         /// ICP
         for(int icp=0; icp<par.max_icp; ++icp) {
             if(par.print_icpn) std::cout << "Iteration #" << icp << "/" << par.max_icp << std::endl;
@@ -297,6 +298,7 @@ namespace SICP {
             Xo2 = X;
             if(stop < par.stop) break;
         }
+        return RigidMotionEstimator::point_to_point(originalX, X);
     }
     /// Sparse ICP with point to plane
     /// @param Source (one 3D point per column)
@@ -304,7 +306,7 @@ namespace SICP {
     /// @param Target normals (one 3D normal per column)
     /// @param Parameters
     template <typename Derived1, typename Derived2, typename Derived3>
-    void point_to_plane(Eigen::MatrixBase<Derived1>& X,
+    Eigen::Affine3d point_to_plane(Eigen::MatrixBase<Derived1>& X,
                         Eigen::MatrixBase<Derived2>& Y,
                         Eigen::MatrixBase<Derived3>& N,
                         Parameters par = Parameters()) {
@@ -317,6 +319,7 @@ namespace SICP {
         Eigen::VectorXd C = Eigen::VectorXd::Zero(X.cols());
         Eigen::Matrix3Xd Xo1 = X;
         Eigen::Matrix3Xd Xo2 = X;
+        Eigen::Matrix3Xd OriginalX = X;
         /// ICP
         for(int icp=0; icp<par.max_icp; ++icp) {
             if(par.print_icpn) std::cout << "Iteration #" << icp << "/" << par.max_icp << std::endl;
@@ -358,6 +361,7 @@ namespace SICP {
             Xo2 = X;
             if(stop < par.stop) break;
         }
+        return RigidMotionEstimator::point_to_point(OriginalX, X);
     }
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -458,7 +462,7 @@ namespace ICP {
     /// @param Source (one 3D point per column)
     /// @param Target (one 3D point per column)
     /// @param Parameters
-    void point_to_point(Eigen::Matrix3Xd& X,
+    Eigen::Affine3d point_to_point(Eigen::Matrix3Xd& X,
                         Eigen::Matrix3Xd& Y,
                         Parameters par = Parameters()) {
         /// Build kd-tree
@@ -468,6 +472,7 @@ namespace ICP {
         Eigen::VectorXd W = Eigen::VectorXd::Zero(X.cols());
         Eigen::Matrix3Xd Xo1 = X;
         Eigen::Matrix3Xd Xo2 = X;
+        Eigen::Matrix3Xd OriginalX = X;
         /// ICP
         for(int icp=0; icp<par.max_icp; ++icp) {
             /// Find closest point
@@ -492,6 +497,7 @@ namespace ICP {
             Xo2 = X;
             if(stop2 < par.stop) break;
         }
+        return RigidMotionEstimator::point_to_point(OriginalX, X);
     }
     /// Reweighted ICP with point to plane
     /// @param Source (one 3D point per column)
@@ -499,7 +505,7 @@ namespace ICP {
     /// @param Target normals (one 3D normal per column)
     /// @param Parameters
     template <typename Derived1, typename Derived2, typename Derived3>
-    void point_to_plane(Eigen::MatrixBase<Derived1>& X,
+    Eigen::Affine3d point_to_plane(Eigen::MatrixBase<Derived1>& X,
                         Eigen::MatrixBase<Derived2>& Y,
                         Eigen::MatrixBase<Derived3>& N,
                         Parameters par = Parameters()) {
@@ -511,6 +517,7 @@ namespace ICP {
         Eigen::VectorXd W = Eigen::VectorXd::Zero(X.cols());
         Eigen::Matrix3Xd Xo1 = X;
         Eigen::Matrix3Xd Xo2 = X;
+        Eigen::Matrix3Xd OriginalX = X;
         /// ICP
         for(int icp=0; icp<par.max_icp; ++icp) {
             /// Find closest point
@@ -537,6 +544,7 @@ namespace ICP {
             Xo2 = X;
             if(stop2 < par.stop) break;
         }
+        return RigidMotionEstimator::point_to_point(OriginalX, X);
     }
 }
 ///////////////////////////////////////////////////////////////////////////////
